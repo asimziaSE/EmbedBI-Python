@@ -3,9 +3,58 @@
 
 from services.pbiembedservice import PbiEmbedService
 from utils import Utils
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, send_from_directory, request
 import json
 import os
+
+import random
+import time
+import sys
+from azure.iot.hub import IoTHubRegistryManager
+
+#####################################################
+
+MESSAGE_COUNT = 1
+MSG_TXT = "{\"Service Client Hydraulics Update C2D\": %.2f}"
+
+CONNECTION_STRING = "HostName=ADAM3600.azure-devices.net;SharedAccessKeyName=service;SharedAccessKey=ORKd4f9ro76W1M2uTXSp869Mrni7sz+4/gkEC/DuHU0="
+DEVICE_ID = "ADAM-3600"
+
+def iothub_run(dev_str, my_val):
+    try:
+        # Create IoTHubRegistryManager
+        registry_manager = IoTHubRegistryManager(CONNECTION_STRING)
+
+        for i in range(0, MESSAGE_COUNT):
+
+            message = 'Device: {} %d'.format(dev_str)
+            print(message)
+            #DUMMY_VAR_BOOL = val
+            print ( 'Sending Beacon: {0}'.format(i) )
+            data = message %(my_val)
+            print ( 'LOGIC STATE: {}'.format(data) )
+
+            props={}
+            # optional: assign system properties
+            props.update(messageId = "message_%d" % i)
+            props.update(correlationId = "correlation_%d" % i)
+            props.update(contentType = "application/json")
+
+            # optional: assign application properties
+            prop_text = "PropMsg_%d" % i
+            props.update(testProperty = prop_text)
+
+            registry_manager.send_c2d_message(DEVICE_ID, data, properties=props)
+
+
+    except Exception as ex:
+        print (ex)
+        return
+
+
+
+
+#####################################################
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -13,9 +62,14 @@ app = Flask(__name__)
 # Load configuration
 app.config.from_object('config.BaseConfig')
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     '''Returns a static HTML page'''
+    if request.method == 'POST':
+        if request.form.get('action1') == 'MQ008-ON':
+            iothub_run('MQ008 ON', 1)
+        elif  request.form.get('action2') == 'MQ008-OFF':
+            iothub_run('MQ008 OFF', 0)
 
     return render_template('index.html')
 
