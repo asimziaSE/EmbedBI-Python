@@ -66,21 +66,15 @@ app.config.from_object('config.BaseConfig')
 def index():
     '''Returns a static HTML page'''
     if request.method == 'POST':
-        if request.form.get('b1') == 'MQ158-ON':
-            iothub_run('MQ158 ON', 1)
-        elif  request.form.get('b2') == 'MQ158-OFF':
-            iothub_run('MQ158 OFF', 0)
-            
-        elif  request.form.get('b3') == 'MQ159-ON':
-            iothub_run('MQ159 ON', 1)
-        elif  request.form.get('b4') == 'MQ159-OFF':
-            iothub_run('MQ159 OFF', 0)
-            
-        elif  request.form.get('b5') == 'MQ160-ON':
-            iothub_run('MQ160 ON', 1)
-        elif  request.form.get('b6') == 'MQ160-OFF':
-            iothub_run('MQ160 OFF', 0)
+        if request.form.get('b1') == 'START':
+            iothub_run('START', 1)
 
+        elif  request.form.get('b3') == 'STOP':
+            iothub_run('STOP', 1)
+            
+        elif  request.form.get('b5') == 'RESET':
+            iothub_run('RESET', 1)
+            
         elif  request.form.get('b7') == 'MQ269-FLUSH':
             iothub_run('MQ269 FLUSH', 1)
         elif  request.form.get('b8') == 'MQ161-FORWARD':
